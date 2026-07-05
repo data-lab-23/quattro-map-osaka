@@ -19,6 +19,6 @@ export function MapView({ shops }: { shops: Shop[] }) {
     if(window.google) void render(); else { const script=document.createElement("script"); script.src=`https://maps.googleapis.com/maps/api/js?key=${key}&loading=async&libraries=marker&callback=Function.prototype`; script.async=true; script.onload=()=>void render(); script.onerror=()=>setError(true); document.head.appendChild(script); }
     return()=>{active=false};
   },[key,shops]);
-  if(!key||error) return <div className="map-fallback"><span>🗺️</span><div><strong>{error?"地図を読み込めませんでした":"Google Mapは準備中です"}</strong><p>APIキーを設定すると、ここに店舗ピンが表示されます。</p><Link href="/submit">お店の情報を送る →</Link></div></div>;
+  if(!key||error) return <div className="google-embed"><iframe title="大阪市のクアトロフォルマッジ検索地図" src="https://www.google.com/maps?q=%E3%82%AF%E3%82%A2%E3%83%88%E3%83%AD%E3%83%95%E3%82%A9%E3%83%AB%E3%83%9E%E3%83%83%E3%82%B8+%E5%A4%A7%E9%98%AA%E5%B8%82&output=embed" loading="lazy" referrerPolicy="no-referrer-when-downgrade" allowFullScreen/><div><strong>Google Mapsで大阪市の候補店を表示中</strong><span>掲載情報は店舗ページと公式情報をあわせてご確認ください。</span><Link href="/submit">お店の情報を送る →</Link></div></div>;
   return <div ref={ref} className="map" role="region" aria-label="店舗マップ"/>;
 }

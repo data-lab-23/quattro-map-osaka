@@ -4,8 +4,9 @@ import type { Shop } from "@/types/shop";
 import { HoneyBadge } from "./HoneyBadge";
 import { VerificationBadge } from "./VerificationBadge";
 export function ShopCard({ shop }: { shop: Shop }) {
+  const basePath=process.env.NEXT_PUBLIC_BASE_PATH??"";
   return <article className="shop-card">
-    {shop.imageUrl&&<Link className="shop-image" href={`/shops/${shop.slug}`}><Image src={shop.imageUrl} alt={`${shop.name}のイメージ写真`} fill sizes="(max-width: 560px) 100vw, 33vw"/><span>IMAGE</span></Link>}
+    {shop.imageUrl&&<Link className="shop-image" href={`/shops/${shop.slug}`}><Image src={`${basePath}${shop.imageUrl}`} alt={`${shop.name}のイメージ写真`} fill sizes="(max-width: 560px) 100vw, 33vw"/><span>IMAGE</span></Link>}
     <div className="card-top"><span className="ward">大阪市{shop.ward}</span></div>
     <h3><Link href={`/shops/${shop.slug}`}>{shop.name}</Link></h3>
     <p className="station">📍 {shop.nearestStation ?? shop.address}</p>
