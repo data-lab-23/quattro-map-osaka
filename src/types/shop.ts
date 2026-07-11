@@ -9,5 +9,6 @@ export type Shop = {
   verificationSourceLabel?: string; verificationSourceUrl?: string; lastVerifiedAt?: string;
   quattroPriceText?: string; cheeseDescription?: string; honeyStatus: HoneyStatus;
   lunchAvailable?: boolean; takeoutAvailable?: boolean; openingHoursText?: string;
+  closedDaysText?: string; sourceUrls?: string[];
   description: string; notes?: string; imageUrl?: string; published: boolean; sample?: boolean;
 };

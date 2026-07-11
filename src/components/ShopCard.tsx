@@ -29,6 +29,8 @@ export function ShopCard({ shop }: { shop: Shop }) {
       </h3>
       <p className="station">🚉 {shop.nearestStation ?? shop.address}</p>
       <p className="access">📍 {shop.accessText}</p>
+      {shop.openingHoursText && <p className="access">🕒 {shop.openingHoursText}</p>}
+      {shop.quattroPriceText && <p className="access">💴 {shop.quattroPriceText}</p>}
       {shop.googleRating && (
         <div className="rating">
           <strong>★ {shop.googleRating.toFixed(1)}</strong>

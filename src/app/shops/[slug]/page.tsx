@@ -142,6 +142,10 @@ export default async function ShopPage({ params }: Props) {
                 <dt>営業時間</dt>
                 <dd>{shop.openingHoursText ?? "未確認"}</dd>
               </div>
+              <div>
+                <dt>定休日</dt>
+                <dd>{shop.closedDaysText ?? "未確認"}</dd>
+              </div>
             </dl>
           </section>
 
@@ -172,6 +176,11 @@ export default async function ShopPage({ params }: Props) {
                 Instagram →
               </a>
             )}
+            {shop.sourceUrls?.slice(0, 3).map((url, index) => (
+              <a key={url} href={url} target="_blank" rel="noreferrer">
+                情報源{index + 1} →
+              </a>
+            ))}
           </div>
         </aside>
       </div>
