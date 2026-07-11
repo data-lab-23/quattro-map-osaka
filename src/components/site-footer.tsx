@@ -13,6 +13,7 @@ export function SiteFooter() {
         <div>
           <Link href="/#shops">お店を探す</Link>
           <Link href="/submit">掲載・修正依頼</Link>
+          <Link href="/privacy">プライバシーポリシー</Link>
         </div>
       </div>
       <p className="copyright">
