@@ -14,6 +14,9 @@ export const metadata: Metadata = {
     template: `%s | ${siteName}`,
   },
   description: siteDescription,
+  verification: {
+    google: "zTMq_D0axaLmHIyprF-6pXTuXlenLS_yZ11rU5hGes0",
+  },
   alternates: {
     canonical: "/",
   },
