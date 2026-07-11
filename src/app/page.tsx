@@ -1,16 +1,69 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { ShopExplorer } from "@/components/ShopExplorer";
 import { getPublishedShops } from "@/lib/shops";
 import { siteOwnerNote } from "@/data/site";
 import { wards } from "@/data/wards";
+import { absoluteUrl, ogImagePath, siteDescription, siteKeywords, siteName } from "@/lib/seo";
+
+export const metadata: Metadata = {
+  title: "大阪のクアトロフォルマッジ店を地図で探す",
+  description:
+    "大阪市でクアトロフォルマッジが食べられるピザ屋・イタリアンを、地図、エリア、Googleレビュー、アクセス、公式URLから探せる情報サイトです。",
+  keywords: siteKeywords,
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "クアトロマップ大阪｜大阪のクアトロフォルマッジ店を地図で探す",
+    description: siteDescription,
+    url: absoluteUrl("/"),
+    images: [
+      {
+        url: absoluteUrl(ogImagePath),
+        width: 1200,
+        height: 630,
+        alt: "大阪のクアトロフォルマッジを探すクアトロマップ大阪",
+      },
+    ],
+  },
+};
 
 export default function Home() {
   const shops = getPublishedShops();
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: siteName,
+      url: absoluteUrl("/"),
+      description: siteDescription,
+      inLanguage: "ja-JP",
+      publisher: {
+        "@type": "Organization",
+        name: "Malbon",
+      },
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      name: "大阪市のクアトロフォルマッジ掲載店",
+      description: "大阪市でクアトロフォルマッジが食べられる候補店の一覧です。",
+      numberOfItems: shops.length,
+      itemListElement: shops.slice(0, 54).map((shop, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        url: absoluteUrl(`/shops/${shop.slug}`),
+        name: shop.name,
+      })),
+    },
+  ];
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <section className="hero">
         <div className="hero-backdrop">
           <Image

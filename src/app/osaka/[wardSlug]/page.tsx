@@ -4,6 +4,7 @@ import { MapView } from "@/components/MapView";
 import { ShopCard } from "@/components/ShopCard";
 import { wards } from "@/data/wards";
 import { getShopsByWard } from "@/lib/shops";
+import { absoluteUrl, siteName } from "@/lib/seo";
 
 type Props = { params: Promise<{ wardSlug: string }> };
 
@@ -16,8 +17,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const ward = wards.find((item) => item.slug === wardSlug);
   return ward
     ? {
-        title: `大阪市${ward.name}のクアトロフォルマッジ`,
-        description: `大阪市${ward.name}でクアトロフォルマッジが食べられる候補店を地図と一覧から探せます。`,
+        title: `大阪市${ward.name}のクアトロフォルマッジ店`,
+        description: `大阪市${ward.name}でクアトロフォルマッジが食べられるピザ屋・イタリアン候補を、地図、Google評価、アクセス情報から探せます。`,
+        alternates: {
+          canonical: `/osaka/${ward.slug}`,
+        },
+        openGraph: {
+          title: `大阪市${ward.name}のクアトロフォルマッジ店`,
+          description: `大阪市${ward.name}でクアトロフォルマッジが食べられる候補店を地図と一覧から探せます。`,
+          url: absoluteUrl(`/osaka/${ward.slug}`),
+        },
       }
     : {};
 }
@@ -29,9 +38,48 @@ export default async function WardPage({ params }: Props) {
 
   const list = getShopsByWard(ward.slug);
   const verified = list.filter((shop) => shop.verificationStatus.startsWith("verified")).length;
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      name: `大阪市${ward.name}のクアトロフォルマッジ店`,
+      url: absoluteUrl(`/osaka/${ward.slug}`),
+      description: `大阪市${ward.name}でクアトロフォルマッジが食べられる候補店の一覧です。`,
+      inLanguage: "ja-JP",
+      mainEntity: {
+        "@type": "ItemList",
+        numberOfItems: list.length,
+        itemListElement: list.map((shop, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          url: absoluteUrl(`/shops/${shop.slug}`),
+          name: shop.name,
+        })),
+      },
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: siteName,
+          item: absoluteUrl("/"),
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: `大阪市${ward.name}`,
+          item: absoluteUrl(`/osaka/${ward.slug}`),
+        },
+      ],
+    },
+  ];
 
   return (
     <div className="container ward-page">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <span className="eyebrow">OSAKA / {ward.slug.toUpperCase()}</span>
       <h1>
         大阪市{ward.name}で

@@ -2,24 +2,52 @@ import type { Metadata } from "next";
 import { Analytics } from "@/components/Analytics";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { siteDescription, siteName } from "@/lib/seo";
+import { absoluteUrl, ogImagePath, siteDescription, siteKeywords, siteName, siteUrl } from "@/lib/seo";
 import "./globals.css";
-
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://arsenal23vm-netizen.github.io/quattro-map-osaka";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
+  applicationName: siteName,
+  keywords: siteKeywords,
   title: {
     default: siteName,
     template: `%s | ${siteName}`,
   },
   description: siteDescription,
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
     type: "website",
     locale: "ja_JP",
+    url: siteUrl,
     siteName,
     title: siteName,
     description: siteDescription,
+    images: [
+      {
+        url: absoluteUrl(ogImagePath),
+        width: 1200,
+        height: 630,
+        alt: "大阪のクアトロフォルマッジとピッツェリアを探すクアトロマップ大阪",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteName,
+    description: siteDescription,
+    images: [absoluteUrl(ogImagePath)],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
 };
 
