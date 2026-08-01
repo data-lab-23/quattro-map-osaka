@@ -1,5 +1,6 @@
 export const navItems = [
   { href: "/#shops", label: "お店を探す" },
+  { href: "/about", label: "運営・掲載基準" },
   { href: "/submit", label: "掲載・修正依頼" },
 ];
 
