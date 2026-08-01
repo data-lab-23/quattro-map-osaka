@@ -58,13 +58,19 @@ Copy the two exact Markdown files from the current safe copy. Do not copy `.git`
 - [ ] **Step 4: Restore dependencies and run the baseline checks**
 
 ```powershell
-npm ci
-npm test
-npm run lint
-npm run build
+if (Get-Command npm -ErrorAction SilentlyContinue) {
+  npm ci
+  npm run lint
+  npm run build
+} else {
+  pnpm import
+  pnpm install --frozen-lockfile --config.dangerouslyAllowAllBuilds=true
+  pnpm run lint
+  pnpm run build
+}
 ```
 
-Expected: 6 existing tests pass, ESLint exits 0, and the static build creates `out/`.
+Expected: the clean GitHub remote has no `test` script or committed test files, so do not import tests from OneDrive in Task 1. Record that absence, then use lint and the static build as this revision's existing baseline checks. ESLint exits 0 and the static build creates `out/`. Later tasks create the SEO tests.
 
 - [ ] **Step 5: Record the public failure**
 
@@ -73,6 +79,8 @@ Invoke-WebRequest https://arsenal23vm-netizen.github.io/quattro-map-osaka/ -UseB
 ```
 
 Expected before repair: HTTP 404. Save the HTTP status and UTC timestamp in `docs/seo-baseline.md` together with the baseline page/test counts.
+
+If the local PowerShell request fails because this machine cannot acquire Schannel credentials, use the in-app `web.run` tool with `open: [{ ref_id: "https://arsenal23vm-netizen.github.io/quattro-map-osaka/" }]`. Record the tool input and its captured `(404) Not Found` response in `docs/seo-baseline.md`; do not describe it as an unspecified alternate fetch.
 
 - [ ] **Step 6: Commit the clean baseline documentation**
 
