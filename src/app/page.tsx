@@ -13,6 +13,7 @@ export const metadata: Metadata = {
     description:
       "大阪市でクアトロフォルマッジが食べられるピザ屋・イタリアンを、地図、エリア、Googleレビュー、アクセス、公式URLから探せる情報サイトです。",
     path: "/",
+    absoluteTitle: true,
   }),
   keywords: siteKeywords,
 };

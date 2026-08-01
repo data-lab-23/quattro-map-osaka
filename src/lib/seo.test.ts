@@ -8,9 +8,10 @@ test("ホームページを一貫したタイトルとcanonicalへ導く", () =>
     description:
       "大阪市内のクアトロフォルマッジ提供店を地域・評価・口コミ・アクセスから比較できます。",
     path: "/",
+    absoluteTitle: true,
   });
 
-  assert.equal(metadata.title, "大阪のクアトロフォルマッジを探す");
+  assert.deepEqual(metadata.title, { absolute: "大阪のクアトロフォルマッジを探す" });
   assert.deepEqual(metadata.alternates, { canonical: "/" });
   assert.equal(metadata.openGraph?.url, absoluteUrl("/"));
 });

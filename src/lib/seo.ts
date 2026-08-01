@@ -29,6 +29,7 @@ export type PageMetadataInput = {
   description: string;
   path: string;
   imagePath?: string;
+  absoluteTitle?: boolean;
 };
 
 export function buildPageMetadata({
@@ -36,9 +37,10 @@ export function buildPageMetadata({
   description,
   path,
   imagePath = ogImagePath,
+  absoluteTitle = false,
 }: PageMetadataInput): Metadata {
   return {
-    title,
+    title: absoluteTitle ? { absolute: title } : title,
     description,
     alternates: { canonical: path },
     openGraph: {
