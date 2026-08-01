@@ -1,4 +1,4 @@
-import { access, readdir, readFile } from "node:fs/promises";
+import { readdir, readFile, stat } from "node:fs/promises";
 import { resolve, relative } from "node:path";
 import {
   auditHtmlDocument,
@@ -21,13 +21,17 @@ async function htmlFiles(directory: string): Promise<string[]> {
   return files.flat().sort();
 }
 
-async function exists(path: string) {
+async function isFile(path: string) {
   try {
-    await access(path);
-    return true;
+    return (await stat(path)).isFile();
   } catch {
     return false;
   }
+}
+
+function isFrameworkErrorArtifact(relativeFile: string) {
+  const normalizedFile = relativeFile.replace(/\\/g, "/");
+  return normalizedFile === "404.html" || normalizedFile === "_not-found.html";
 }
 
 export async function verifySeoBuild(
@@ -48,7 +52,7 @@ export async function verifySeoBuild(
   }
 
   for (const crawlFile of ["robots.txt", "sitemap.xml"]) {
-    if (!(await exists(resolve(outDirectory, crawlFile)))) {
+    if (!(await isFile(resolve(outDirectory, crawlFile)))) {
       errors.push({ file: crawlFile, error: `${crawlFile} missing` });
     }
   }
@@ -57,16 +61,17 @@ export async function verifySeoBuild(
   for (const file of files) {
     const html = await readFile(file, "utf8");
     const fileErrors = auditHtmlDocument(html, expectedCanonicalPrefix);
-    const nonIndexable = isNonIndexableHtml(html);
-    const visibleErrors = nonIndexable
+    const relativeFile = relative(outDirectory, file);
+    const frameworkNoindexErrorArtifact =
+      isFrameworkErrorArtifact(relativeFile) && isNonIndexableHtml(html);
+    const visibleErrors = frameworkNoindexErrorArtifact
       ? fileErrors.filter((error) => error !== "canonical missing" && error !== "canonical outside production site")
       : fileErrors;
-    const relativeFile = relative(outDirectory, file);
 
     for (const error of visibleErrors) errors.push({ file: relativeFile, error });
 
     const canonical = canonicalHrefFromHtml(html);
-    if (canonical && !nonIndexable) {
+    if (canonical && !frameworkNoindexErrorArtifact) {
       canonicalFiles.set(canonical, [...(canonicalFiles.get(canonical) ?? []), relativeFile]);
     }
   }

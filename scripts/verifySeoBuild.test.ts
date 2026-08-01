@@ -15,6 +15,11 @@ function page(canonical: string, extraHead = "") {
   return `<!doctype html><html lang="ja"><head><title>大阪のピザ</title><meta name="description" content="大阪で食べるピザを探す。"><link rel="canonical" href="${canonical}">${extraHead}</head><body><h1>大阪のピザ</h1></body></html>`;
 }
 
+function noindexPage(canonical?: string) {
+  const canonicalTag = canonical ? `<link rel="canonical" href="${canonical}">` : "";
+  return `<!doctype html><html lang="ja"><head><title>Noindex page</title><meta name="description" content="A complete noindex fixture."><meta name="robots" content="noindex">${canonicalTag}</head><body><h1>Noindex page</h1></body></html>`;
+}
+
 async function writeFixture(root: string, files: Record<string, string>) {
   await Promise.all(
     Object.entries(files).map(async ([relativePath, content]) => {
@@ -38,24 +43,68 @@ test("recursively audits a build, accepts a noindex framework error page, and le
   try {
     const index = page(`${productionSite}/`);
     const nested = page(`${productionSite}/guides/lunch`);
-    const notFound = `<!doctype html><html lang="ja"><head><title>404</title><meta name="description" content="見つかりません。"><meta name="robots" content="noindex"></head><body><h1>404</h1></body></html>`;
+    const notFound = noindexPage();
     await writeFixture(outDir, {
       "index.html": index,
       "guides/lunch.html": nested,
       "404.html": notFound,
+      "_not-found.html": notFound,
       "robots.txt": "User-agent: *\nAllow: /\n",
       "sitemap.xml": "<urlset />\n",
     });
-    const before = await Promise.all(["index.html", "guides/lunch.html", "404.html", "robots.txt", "sitemap.xml"].map((file) => readFile(resolve(outDir, file), "utf8")));
+    const trackedFiles = ["index.html", "guides/lunch.html", "404.html", "_not-found.html", "robots.txt", "sitemap.xml"];
+    const before = await Promise.all(trackedFiles.map((file) => readFile(resolve(outDir, file), "utf8")));
 
     const result = runVerifier(outDir);
 
     assert.equal(result.status, 0, result.stderr);
-    assert.match(result.stdout, /SEO audit passed: 3 HTML files checked/);
+    assert.match(result.stdout, /SEO audit passed: 4 HTML files checked/);
     assert.deepEqual(
-      await Promise.all(["index.html", "guides/lunch.html", "404.html", "robots.txt", "sitemap.xml"].map((file) => readFile(resolve(outDir, file), "utf8"))),
+      await Promise.all(trackedFiles.map((file) => readFile(resolve(outDir, file), "utf8"))),
       before,
     );
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test("keeps canonical and duplicate-canonical errors for ordinary noindex pages", async () => {
+  const outDir = await mkdtemp(resolve(tmpdir(), "seo-audit-"));
+  try {
+    await writeFixture(outDir, {
+      "index.html": page(`${productionSite}/shared`),
+      "ordinary-noindex.html": noindexPage(`${productionSite}/shared`),
+      "missing-noindex.html": noindexPage(),
+      "outside-noindex.html": noindexPage("https://example.com/quattro-map-osaka-other"),
+      "nested/404.html": noindexPage(),
+      "robots.txt": "User-agent: *\nAllow: /\n",
+      "sitemap.xml": "<urlset />\n",
+    });
+
+    const result = runVerifier(outDir);
+
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /ordinary-noindex\.html: duplicate canonical/);
+    assert.match(result.stderr, /index\.html: duplicate canonical/);
+    assert.match(result.stderr, /missing-noindex\.html: canonical missing/);
+    assert.match(result.stderr, /outside-noindex\.html: canonical outside production site/);
+    assert.match(result.stderr, /nested[\\/]404\.html: canonical missing/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
+test("rejects crawl artifact paths that are directories", async () => {
+  const outDir = await mkdtemp(resolve(tmpdir(), "seo-audit-"));
+  try {
+    await writeFixture(outDir, { "index.html": page(`${productionSite}/`) });
+    await Promise.all([mkdir(resolve(outDir, "robots.txt")), mkdir(resolve(outDir, "sitemap.xml"))]);
+
+    const result = runVerifier(outDir);
+
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /robots\.txt: robots\.txt missing/);
+    assert.match(result.stderr, /sitemap\.xml: sitemap\.xml missing/);
   } finally {
     await rm(outDir, { recursive: true, force: true });
   }
