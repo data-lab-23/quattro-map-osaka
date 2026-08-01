@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { MapView } from "@/components/MapView";
 import { ShopCard } from "@/components/ShopCard";
+import { guides, getShopsForGuide } from "@/data/guides";
 import { wards } from "@/data/wards";
 import { getShopsByWard } from "@/lib/shops";
 import { absoluteUrl, siteName } from "@/lib/seo";
@@ -45,6 +47,10 @@ export default async function WardPage({ params }: Props) {
     { name: `大阪市${ward.name}`, path: `/osaka/${ward.slug}` },
   ];
   const itemList = buildItemListJsonLd({ name: ward.name, shops: list });
+  const relatedGuides = guides.filter((guide) => getShopsForGuide(guide, list).length > 0);
+  const relatedWards = wards.filter(
+    (candidate) => candidate.slug !== ward.slug && getShopsByWard(candidate.slug).length > 0,
+  );
   const jsonLd = [
     {
       "@context": "https://schema.org",
@@ -65,24 +71,14 @@ export default async function WardPage({ params }: Props) {
   return (
     <div className="container ward-page">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <nav aria-label="パンくず" className="breadcrumbs">
-        <ol>
-          {breadcrumbItems.map((item) => (
-            <li key={item.path}>
-              <Link href={item.path}>{item.name}</Link>
-            </li>
-          ))}
-        </ol>
-      </nav>
+      <Breadcrumbs items={breadcrumbItems} />
       <span className="eyebrow">OSAKA / {ward.slug.toUpperCase()}</span>
       <h1>
         大阪市{ward.name}で
         <br />
         クアトロフォルマッジを探す
       </h1>
-      <p className="lead">
-        {ward.name}のピザ屋・イタリアンを、アクセスや確認状況とあわせて紹介します。
-      </p>
+      <p className="lead">{ward.summary}</p>
       <div className="stats">
         <div>
           <strong>{list.length}</strong>
@@ -99,6 +95,30 @@ export default async function WardPage({ params }: Props) {
           <ShopCard key={shop.id} shop={shop} />
         ))}
       </div>
+      {relatedGuides.length > 0 && (
+        <section className="related-links" aria-labelledby="ward-guide-links">
+          <h2 id="ward-guide-links">目的・駅から探す</h2>
+          <div>
+            {relatedGuides.map((guide) => (
+              <Link key={guide.slug} href={`/guides/${guide.slug}`}>
+                {guide.title}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+      {relatedWards.length > 0 && (
+        <section className="related-links" aria-labelledby="nearby-ward-links">
+          <h2 id="nearby-ward-links">大阪市のほかの区から探す</h2>
+          <div>
+            {relatedWards.map((candidate) => (
+              <Link key={candidate.slug} href={`/osaka/${candidate.slug}`}>
+                大阪市{candidate.name}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
       {!list.length && <p className="empty">現在、この区の掲載店舗はありません。情報を募集中です。</p>}
     </div>
   );

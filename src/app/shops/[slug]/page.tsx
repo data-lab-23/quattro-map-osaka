@@ -2,8 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { HoneyBadge } from "@/components/HoneyBadge";
 import { VerificationBadge } from "@/components/VerificationBadge";
+import { getGuidesForShop } from "@/data/guides";
 import { getShopBySlug } from "@/lib/shops";
 import { shops } from "@/data/shops";
 import { absoluteUrl, siteName } from "@/lib/seo";
@@ -65,21 +67,14 @@ export default async function ShopPage({ params }: Props) {
     { name: shop.name, path: `/shops/${shop.slug}` },
   ];
   const jsonLd = [buildRestaurantJsonLd(shop), buildBreadcrumbJsonLd(breadcrumbItems)];
+  const applicableGuides = getGuidesForShop(shop);
 
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <section className="detail-hero">
         <div className="container">
-          <nav aria-label="パンくず" className="breadcrumbs">
-            <ol>
-              {breadcrumbItems.map((item) => (
-                <li key={item.path}>
-                  <Link href={item.path}>{item.name}</Link>
-                </li>
-              ))}
-            </ol>
-          </nav>
+          <Breadcrumbs items={breadcrumbItems} />
           <Link className="back" href="/">
             ← お店一覧に戻る
           </Link>
@@ -185,6 +180,17 @@ export default async function ShopPage({ params }: Props) {
           <div className="caution">
             メニューや所在地は変更される場合があります。訪問前に店舗URL・Google Maps・公式情報をご確認ください。
           </div>
+          <section className="related-links shop-related-links" aria-labelledby="shop-related-links">
+            <h2 id="shop-related-links">関連ページ</h2>
+            <div>
+              <Link href={`/osaka/${shop.wardSlug}`}>大阪市{shop.ward}の掲載店を見る</Link>
+              {applicableGuides.map((guide) => (
+                <Link key={guide.slug} href={`/guides/${guide.slug}`}>
+                  {guide.title}
+                </Link>
+              ))}
+            </div>
+          </section>
         </article>
 
         <aside className="side-card">

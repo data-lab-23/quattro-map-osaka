@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { shops } from "@/data/shops";
+import { createGuides } from "@/data/guides";
 import { absoluteUrl } from "@/lib/seo";
 import { buildSitemap, buildSitemapFromData, latestVerifiedDate } from "./sitemap";
 import type { Shop } from "@/types/shop";
@@ -48,7 +49,22 @@ test("buildSitemap emits unique current URLs without priority", () => {
   assert.ok(urls.includes(absoluteUrl("/about")));
   assert.ok(urls.includes(absoluteUrl("/submit")));
   assert.ok(urls.some((url) => url.includes("/shops/")));
+  assert.ok(urls.some((url) => url.includes("/guides/")));
   assert.ok(sitemap.every((entry) => !("priority" in entry)));
+});
+
+test("buildSitemapFromData includes non-empty guide URLs with the shared latest date", () => {
+  const sourceShops = [
+    shopFixture({ slug: "lunch", lunchAvailable: true, lastVerifiedAt: "2026-06-01" }),
+    shopFixture({ slug: "station-peer", nearestStation: "梅田駅", lastVerifiedAt: "2026-07-20" }),
+    shopFixture({ slug: "station-target", nearestStation: "梅田駅", lastVerifiedAt: "2026-06-02" }),
+  ];
+  const sourceGuides = createGuides(sourceShops);
+  const sitemap = buildSitemapFromData(sourceShops, [], sourceGuides);
+  const guideEntry = sitemap.find((entry) => String(entry.url) === absoluteUrl("/guides/lunch"));
+
+  assert.ok(guideEntry);
+  assert.equal(new Date(guideEntry.lastModified!).toISOString(), "2026-07-20T00:00:00.000Z");
 });
 
 test("buildSitemap uses each published shop's verified date for its detail URL", () => {

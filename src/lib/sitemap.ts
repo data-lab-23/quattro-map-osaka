@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { guides, type GuideDefinition } from "@/data/guides";
 import { shops } from "@/data/shops";
 import { wards } from "@/data/wards";
 import { absoluteUrl } from "@/lib/seo";
@@ -31,6 +32,7 @@ export function latestVerifiedDate(shops: Shop[]): Date {
 export function buildSitemapFromData(
   sourceShops: Shop[],
   sourceWards: ReadonlyArray<{ slug: string }>,
+  sourceGuides: readonly GuideDefinition[] = [],
 ): MetadataRoute.Sitemap {
   const publishedShops = sourceShops.filter((shop) => shop.published);
   const sharedLastModified = latestVerifiedDate(publishedShops);
@@ -41,6 +43,11 @@ export function buildSitemapFromData(
     { url: absoluteUrl("/submit"), lastModified: sharedLastModified, changeFrequency: "monthly" },
     ...sourceWards.map((ward) => ({
       url: absoluteUrl(`/osaka/${ward.slug}`),
+      lastModified: sharedLastModified,
+      changeFrequency: "weekly" as const,
+    })),
+    ...sourceGuides.map((guide) => ({
+      url: absoluteUrl(`/guides/${guide.slug}`),
       lastModified: sharedLastModified,
       changeFrequency: "weekly" as const,
     })),
@@ -61,5 +68,5 @@ export function buildSitemapFromData(
 }
 
 export function buildSitemap(): MetadataRoute.Sitemap {
-  return buildSitemapFromData(shops, wards);
+  return buildSitemapFromData(shops, wards, guides);
 }
