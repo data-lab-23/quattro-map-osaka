@@ -1,23 +1,45 @@
 # SEO baseline
 
-Captured: `2026-08-01T04:43:56.101Z` (UTC)
+This record distinguishes observed evidence from actions that still require a successful production deployment or an authenticated external service.
 
-## Public Pages check
+## Prior public observation
 
-- URL: `https://arsenal23vm-netizen.github.io/quattro-map-osaka/`
-- HTTP status: `404 Not Found`
-- Primary command attempted: `Invoke-WebRequest https://arsenal23vm-netizen.github.io/quattro-map-osaka/ -UseBasicParsing`
-- Primary command output: `接続が切断されました: 受信時に予期しないエラーが発生しました。` (`SEC_E_NO_CREDENTIALS` from this Windows session's Schannel provider), so it did not yield an HTTP status.
-- Alternate tool and exact input: `web.run` → `open: [{"ref_id":"https://arsenal23vm-netizen.github.io/quattro-map-osaka/"}]`, `response_length: "short"`.
-- Captured alternate-tool response at the timestamp above: `L0: Failed to fetch https://arsenal23vm-netizen.github.io/quattro-map-osaka/: (404) Not Found`.
+- Captured: `2026-08-01T04:43:56.101Z` (UTC).
+- URL: `https://arsenal23vm-netizen.github.io/quattro-map-osaka/`.
+- Observed result: `(404) Not Found`.
+- The PowerShell request `Invoke-WebRequest https://arsenal23vm-netizen.github.io/quattro-map-osaka/ -UseBasicParsing` could not obtain Windows Schannel credentials (`SEC_E_NO_CREDENTIALS`), so it did not itself return an HTTP status.
+- Alternate evidence: `web.run` with `open: [{"ref_id":"https://arsenal23vm-netizen.github.io/quattro-map-osaka/"}]` captured `Failed to fetch https://arsenal23vm-netizen.github.io/quattro-map-osaka/: (404) Not Found` at the timestamp above.
 
-## Local baseline
+## Branch and base
 
-- Dependency restore: `pnpm import` followed by `pnpm install --frozen-lockfile --config.dangerouslyAllowAllBuilds=true` with bundled Node `v24.14.0` and pnpm `11.9.0`. This is a local fallback because `npm` is unavailable on PATH; `package.json` and `package-lock.json` were preserved.
-- Test-script check: `pnpm test` exited `1` because the GitHub remote's `package.json` has no `test` script. Zero matching test files were found in the clean clone. Task 1 does not import OneDrive tests; later tasks create the SEO tests.
-- Existing baseline checks: `pnpm run lint` exited `0`, and `pnpm run build` exited `0`. Next.js reported 73 generated static pages; the `out/` directory exists with 70 HTML files (645 output files total).
+- Working branch: `codex/seo-search-growth`.
+- Current branch head before the Task 8 documentation commit: `4e7ed75` (`fix: scope SEO error artifact exemption`).
+- Base branch and commit: `origin/main` at `7c14acc` (`Add Google site verification meta`).
+- Ancestry check before the Task 8 documentation commit: `origin/main` is an ancestor of the working branch; the branch was 15 commits ahead and 0 commits behind.
 
-## Deployment configuration inspected
+## Local verification summary
 
-- `.github/workflows/deploy-pages.yml` deploys only on pushes to `main` and uploads `./out` after setting the `/quattro-map-osaka` Pages base path.
-- `next.config.ts` uses `output: "export"` and derives `basePath` from `PAGES_BASE_PATH`.
+- Fresh Task 8 production-equivalent verification passed on `2026-08-01`: `npm test` (31 passing tests), `npm run lint`, `npm run typecheck`, production `npm run build` (89 static routes), and `npm run verify:seo` (86 HTML files audited) each exited `0`.
+- `npm ci --dry-run` compatibility passed on `2026-08-01` with exit `0`.
+- Final `git diff --check` and `git diff --cached --check` produced no output before the documentation commit.
+- The only pre-existing worktree change observed before Task 8 documentation was the unrelated, untracked `pnpm-lock.yaml`; it is not to be committed as part of this task.
+
+## Deployment and Search Console status
+
+- GitHub Pages deployment for this branch: pending; no deployment success is claimed here.
+- Production seven-URL and asset checks: pending a successful Pages deployment.
+- Search Console access, sitemap submission, URL inspection, and indexing requests: pending authenticated follow-up.
+- Search rankings, clicks, impressions, CTR, and average position: no post-deployment data recorded.
+
+## Post-deploy evidence to record
+
+| Field | Value |
+| --- | --- |
+| Deployment date/time (UTC) | pending |
+| Deployment workflow URL and result | pending |
+| Deployed commit SHA | pending |
+| Seven URL HTTP results and asset results | pending |
+| Canonical checks | pending |
+| Search Console sitemap submission date | pending |
+| URL inspection/indexing request dates and targets | pending |
+| First complete 28-day Search Console period and results | pending |
