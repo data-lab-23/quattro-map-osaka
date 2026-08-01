@@ -86,16 +86,59 @@ $assets | ForEach-Object {
 }
 ```
 
-CI-safe shell status check (replace the three asset paths with paths found in the deployed home HTML):
+CI-safe Bash status check (replace the `CURRENT` CSS and JavaScript paths with paths found in the deployed home HTML). This intentionally does **not** follow redirects: every expected URL must answer directly with `200` and retain the exact effective URL.
 
 ```sh
+set -euo pipefail
+
 base=https://arsenal23vm-netizen.github.io/quattro-map-osaka
-for path in / /about/ /osaka/kita/ /guides/lunch/ /shops/7-/ /robots.txt /sitemap.xml; do
-  curl --fail --silent --show-error --location --output /dev/null --write-out "%{http_code} $base$path\\n" "$base$path"
+required_paths=(
+  /
+  /about/
+  /osaka/kita/
+  /guides/lunch/
+  /shops/7-/
+  /robots.txt
+  /sitemap.xml
+)
+selected_assets=(
+  "$base/_next/static/chunks/CURRENT.css"
+  "$base/_next/static/chunks/CURRENT.js"
+  "$base/images/quattro-formaggi-hero.png"
+)
+
+check_direct_200() {
+  local expected_url=$1
+  local label=$2
+  local result http_status effective_url
+
+  if ! result="$(curl --silent --show-error --output /dev/null --max-redirs 0 \
+    --write-out '%{http_code} %{url_effective}' "$expected_url")"; then
+    printf 'ERROR: %s request failed: %s\n' "$label" "$expected_url" >&2
+    return 1
+  fi
+
+  http_status=${result%% *}
+  effective_url=${result#* }
+  if [ "$http_status" != "200" ]; then
+    printf 'ERROR: %s expected direct HTTP 200, got %s: %s\n' "$label" "$http_status" "$expected_url" >&2
+    return 1
+  fi
+  if [ "$effective_url" != "$expected_url" ]; then
+    printf 'ERROR: %s redirected or changed effective URL: expected %s, got %s\n' \
+      "$label" "$expected_url" "$effective_url" >&2
+    return 1
+  fi
+
+  printf 'OK: %s direct HTTP 200: %s\n' "$label" "$expected_url"
+}
+
+for path in "${required_paths[@]}"; do
+  check_direct_200 "$base$path" "required URL"
 done
-curl --fail --silent --show-error --location --output /dev/null "$base/_next/static/chunks/CURRENT.css"
-curl --fail --silent --show-error --location --output /dev/null "$base/_next/static/chunks/CURRENT.js"
-curl --fail --silent --show-error --location --output /dev/null "$base/images/quattro-formaggi-hero.png"
+for asset in "${selected_assets[@]}"; do
+  check_direct_200 "$asset" "home-page asset"
+done
 ```
 
 ## Search Console and 28-day record
