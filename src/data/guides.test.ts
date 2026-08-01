@@ -61,6 +61,26 @@ test("generated guides are non-empty and station matching is exact", () => {
   assert.ok(createGuides(source).every((guide) => getShopsForGuide(guide, source).length > 0));
 });
 
+test("station guide slugs stay stable when an unrelated qualifying station is added", () => {
+  const zetaStationShops = [
+    shop({ id: "zeta-one", nearestStation: "Zeta Station" }),
+    shop({ id: "zeta-two", nearestStation: "Zeta Station" }),
+  ];
+  const before = createGuides(zetaStationShops).find(
+    (guide) => guide.kind === "station" && guide.station === "Zeta Station",
+  );
+  const after = createGuides([
+    ...zetaStationShops,
+    shop({ id: "alpha-one", nearestStation: "Alpha Station" }),
+    shop({ id: "alpha-two", nearestStation: "Alpha Station" }),
+  ]).find((guide) => guide.kind === "station" && guide.station === "Zeta Station");
+
+  assert.ok(before);
+  assert.ok(after);
+  assert.equal(after.slug, before.slug);
+  assert.match(after.slug, /^station-[A-Za-z0-9_-]+$/);
+});
+
 test("a shop exposes every applicable purpose and station guide", () => {
   const target = shop({
     id: "target",

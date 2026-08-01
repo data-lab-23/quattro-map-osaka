@@ -68,8 +68,8 @@ function createStationGuides(source: readonly Shop[]): GuideDefinition[] {
   return [...stationCounts.entries()]
     .filter(([, count]) => count >= 2)
     .sort(([left], [right]) => left.localeCompare(right, "ja"))
-    .map(([station], index) => ({
-      slug: `station-${index + 1}`,
+    .map(([station]) => ({
+      slug: `station-${Buffer.from(station, "utf8").toString("base64url")}`,
       title: `${station}周辺でクアトロフォルマッジを探す`,
       description: `${station}を最寄り駅とする大阪市内の掲載店をまとめました。アクセスや営業時間は訪問前に各店の公式情報で確認してください。`,
       kind: "station" as const,

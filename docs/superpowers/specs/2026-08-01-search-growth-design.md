@@ -121,4 +121,3 @@ GA4が設定できる場合は、店舗詳細閲覧、地図クリック、公�
   - https://developers.google.com/search/docs/fundamentals/get-started-developers
 - Google Search Central「Local Business Structured Data」
   - https://developers.google.com/search/docs/appearance/structured-data/local-business
-

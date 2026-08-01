@@ -1,11 +1,11 @@
-import type { Metadata } from "next";
 import { SubmitShopForm } from "@/components/SubmitShopForm";
+import { buildPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: "掲載・修正依頼",
   description: "クアトロフォルマッジを提供する大阪市のお店の掲載・修正情報を送れます。",
-  alternates: { canonical: "/submit" },
-};
+  path: "/submit",
+});
 
 export default function SubmitPage() {
   return (

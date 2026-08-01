@@ -56,10 +56,10 @@ The Pages workflow restores dependencies with `npm ci`, then runs the same test,
 Do this only after the GitHub Pages deployment workflow reports success. The seven required URLs are:
 
 1. `https://arsenal23vm-netizen.github.io/quattro-map-osaka/`
-2. `https://arsenal23vm-netizen.github.io/quattro-map-osaka/about/`
-3. `https://arsenal23vm-netizen.github.io/quattro-map-osaka/osaka/kita/`
-4. `https://arsenal23vm-netizen.github.io/quattro-map-osaka/guides/lunch/`
-5. `https://arsenal23vm-netizen.github.io/quattro-map-osaka/shops/7-/`
+2. `https://arsenal23vm-netizen.github.io/quattro-map-osaka/about`
+3. `https://arsenal23vm-netizen.github.io/quattro-map-osaka/osaka/kita`
+4. `https://arsenal23vm-netizen.github.io/quattro-map-osaka/guides/lunch`
+5. `https://arsenal23vm-netizen.github.io/quattro-map-osaka/shops/7-`
 6. `https://arsenal23vm-netizen.github.io/quattro-map-osaka/robots.txt`
 7. `https://arsenal23vm-netizen.github.io/quattro-map-osaka/sitemap.xml`
 
@@ -71,18 +71,42 @@ Windows PowerShell status check:
 
 ```powershell
 $base = "https://arsenal23vm-netizen.github.io/quattro-map-osaka"
-$paths = @("/", "/about/", "/osaka/kita/", "/guides/lunch/", "/shops/7-/", "/robots.txt", "/sitemap.xml")
-$paths | ForEach-Object {
-  $response = Invoke-WebRequest -Uri "$base$_" -UseBasicParsing
-  "{0} {1}" -f $response.StatusCode, $response.BaseResponse.ResponseUri.AbsoluteUri
+$paths = @( "/", "/about", "/osaka/kita", "/guides/lunch", "/shops/7-", "/robots.txt", "/sitemap.xml")
+
+function Get-Direct200Response {
+  param(
+    [string]$ExpectedUrl,
+    [string]$Label
+  )
+
+  try {
+    $response = Invoke-WebRequest -Uri $ExpectedUrl -UseBasicParsing -MaximumRedirection 0 -ErrorAction Stop
+  } catch {
+    throw "ERROR: $Label request, redirect, or transport failure for ${ExpectedUrl}: $($_.Exception.Message)"
+  }
+
+  if ($response.StatusCode -ne 200) {
+    throw "ERROR: $Label expected direct HTTP 200, got $($response.StatusCode): $ExpectedUrl"
+  }
+
+  $effectiveUrl = $response.BaseResponse.ResponseUri.AbsoluteUri
+  if ([string]::IsNullOrWhiteSpace($effectiveUrl) -or $effectiveUrl -ne $ExpectedUrl) {
+    throw "ERROR: $Label redirected or changed effective URL: expected $ExpectedUrl, got $effectiveUrl"
+  }
+
+  [Console]::WriteLine("OK: $Label direct HTTP 200: $ExpectedUrl")
+  return $response
 }
-$home = Invoke-WebRequest -Uri "$base/" -UseBasicParsing
-$assets = [regex]::Matches($home.Content, '(?:href|src)="(/quattro-map-osaka/(?:_next/[^"?#]+|images/[^"?#]+))') |
+
+$paths | ForEach-Object {
+  [void](Get-Direct200Response -ExpectedUrl "$base$_" -Label "required URL")
+}
+$homeResponse = Get-Direct200Response -ExpectedUrl "$base/" -Label "home page"
+$assets = [regex]::Matches($homeResponse.Content, '(?:href|src)="(/quattro-map-osaka/(?:_next/[^"?#]+|images/[^"?#]+))') |
   ForEach-Object { $_.Groups[1].Value } |
   Select-Object -Unique
 $assets | ForEach-Object {
-  $response = Invoke-WebRequest -Uri "https://arsenal23vm-netizen.github.io$_" -UseBasicParsing
-  "{0} {1}" -f $response.StatusCode, $response.BaseResponse.ResponseUri.AbsoluteUri
+  [void](Get-Direct200Response -ExpectedUrl "https://arsenal23vm-netizen.github.io$_" -Label "home-page asset")
 }
 ```
 
@@ -94,10 +118,10 @@ set -euo pipefail
 base=https://arsenal23vm-netizen.github.io/quattro-map-osaka
 required_paths=(
   /
-  /about/
-  /osaka/kita/
-  /guides/lunch/
-  /shops/7-/
+  /about
+  /osaka/kita
+  /guides/lunch
+  /shops/7-
   /robots.txt
   /sitemap.xml
 )
@@ -143,7 +167,7 @@ done
 
 ## Search Console and 28-day record
 
-In the authenticated property, submit the sitemap above, inspect the home URL, and request indexing for the home page, `/about/`, `/osaka/kita/`, and the selected verified shop after material changes. Record the date and the exact action in `docs/seo-baseline.md`; do not infer success or a ranking change from having submitted a request.
+In the authenticated property, submit the sitemap above, inspect the home URL, and request indexing for the home page, `/about`, `/osaka/kita`, and the selected verified shop after material changes. Record the date and the exact action in `docs/seo-baseline.md`; do not infer success or a ranking change from having submitted a request.
 
 | Period (UTC) | Query | Clicks | Impressions | CTR | Average position | Index coverage errors | Source / notes |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | --- |

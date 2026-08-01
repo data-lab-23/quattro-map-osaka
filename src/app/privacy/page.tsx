@@ -1,10 +1,10 @@
-import type { Metadata } from "next";
+import { buildPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: "プライバシーポリシー",
   description: "クアトロマップ大阪のアクセス解析、Cookie、アフィリエイトリンクに関する方針です。",
-  alternates: { canonical: "/privacy" },
-};
+  path: "/privacy",
+});
 
 export default function PrivacyPage() {
   return (

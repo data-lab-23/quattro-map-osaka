@@ -68,6 +68,27 @@ test("recursively audits a build, accepts a noindex framework error page, and le
   }
 });
 
+test("rejects an indexable page whose canonical does not match its output route", async () => {
+  const outDir = await mkdtemp(resolve(tmpdir(), "seo-audit-"));
+  try {
+    await writeFixture(outDir, {
+      "index.html": page(`${productionSite}/`),
+      "guides/lunch.html": page(`${productionSite}/guides/dinner`),
+      "nested/index.html": page(`${productionSite}/nested/wrong`),
+      "robots.txt": "User-agent: *\nAllow: /\n",
+      "sitemap.xml": "<urlset />\n",
+    });
+
+    const result = runVerifier(outDir);
+
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /guides[\\/]lunch\.html: canonical does not match output route: expected https:\/\/example\.com\/quattro-map-osaka\/guides\/lunch, got https:\/\/example\.com\/quattro-map-osaka\/guides\/dinner/);
+    assert.match(result.stderr, /nested[\\/]index\.html: canonical does not match output route: expected https:\/\/example\.com\/quattro-map-osaka\/nested, got https:\/\/example\.com\/quattro-map-osaka\/nested\/wrong/);
+  } finally {
+    await rm(outDir, { recursive: true, force: true });
+  }
+});
+
 test("keeps canonical and duplicate-canonical errors for ordinary noindex pages", async () => {
   const outDir = await mkdtemp(resolve(tmpdir(), "seo-audit-"));
   try {

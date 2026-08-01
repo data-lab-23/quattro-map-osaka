@@ -34,6 +34,19 @@ function isFrameworkErrorArtifact(relativeFile: string) {
   return normalizedFile === "404.html" || normalizedFile === "_not-found.html";
 }
 
+function expectedCanonicalForOutputFile(relativeFile: string, expectedCanonicalPrefix: string) {
+  const normalizedFile = relativeFile.replace(/\\/g, "/");
+  const route =
+    normalizedFile === "index.html"
+      ? "/"
+      : normalizedFile.endsWith("/index.html")
+        ? `/${normalizedFile.slice(0, -"/index.html".length)}`
+        : `/${normalizedFile.replace(/\.html$/i, "")}`;
+  const productionSite = expectedCanonicalPrefix.replace(/\/+$/, "");
+
+  return route === "/" ? `${productionSite}/` : `${productionSite}${route}`;
+}
+
 export async function verifySeoBuild(
   outDirectory = resolve(process.cwd(), "out"),
   expectedCanonicalPrefix = process.env.NEXT_PUBLIC_SITE_URL,
@@ -73,6 +86,15 @@ export async function verifySeoBuild(
     const canonical = canonicalHrefFromHtml(html);
     if (canonical && !frameworkNoindexErrorArtifact) {
       canonicalFiles.set(canonical, [...(canonicalFiles.get(canonical) ?? []), relativeFile]);
+    }
+    if (canonical && !isNonIndexableHtml(html)) {
+      const expectedCanonical = expectedCanonicalForOutputFile(relativeFile, expectedCanonicalPrefix);
+      if (canonical !== expectedCanonical) {
+        errors.push({
+          file: relativeFile,
+          error: `canonical does not match output route: expected ${expectedCanonical}, got ${canonical}`,
+        });
+      }
     }
   }
 

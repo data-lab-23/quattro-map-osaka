@@ -72,7 +72,7 @@ export default async function GuidePage({ params }: Props) {
   ];
 
   return (
-    <main className="guide-page container">
+    <div className="guide-page container">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Breadcrumbs items={breadcrumbItems} />
       <span className="eyebrow">QUATTRO GUIDE</span>
@@ -112,6 +112,6 @@ export default async function GuidePage({ params }: Props) {
           </div>
         </section>
       )}
-    </main>
+    </div>
   );
 }
