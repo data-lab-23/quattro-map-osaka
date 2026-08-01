@@ -4,6 +4,7 @@ import { SubmitShopForm } from "@/components/SubmitShopForm";
 export const metadata: Metadata = {
   title: "掲載・修正依頼",
   description: "クアトロフォルマッジを提供する大阪市のお店の掲載・修正情報を送れます。",
+  alternates: { canonical: "/submit" },
 };
 
 export default function SubmitPage() {

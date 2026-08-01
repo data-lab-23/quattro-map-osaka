@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "プライバシーポリシー",
   description: "クアトロマップ大阪のアクセス解析、Cookie、アフィリエイトリンクに関する方針です。",
+  alternates: { canonical: "/privacy" },
 };
 
 export default function PrivacyPage() {
