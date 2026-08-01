@@ -5,29 +5,16 @@ import { ShopExplorer } from "@/components/ShopExplorer";
 import { getPublishedShops } from "@/lib/shops";
 import { siteOwnerNote } from "@/data/site";
 import { wards } from "@/data/wards";
-import { absoluteUrl, ogImagePath, siteDescription, siteKeywords, siteName } from "@/lib/seo";
+import { absoluteUrl, buildPageMetadata, siteDescription, siteKeywords, siteName } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  title: "大阪のクアトロフォルマッジ店を地図で探す",
-  description:
-    "大阪市でクアトロフォルマッジが食べられるピザ屋・イタリアンを、地図、エリア、Googleレビュー、アクセス、公式URLから探せる情報サイトです。",
+  ...buildPageMetadata({
+    title: "大阪のクアトロフォルマッジを探す",
+    description:
+      "大阪市でクアトロフォルマッジが食べられるピザ屋・イタリアンを、地図、エリア、Googleレビュー、アクセス、公式URLから探せる情報サイトです。",
+    path: "/",
+  }),
   keywords: siteKeywords,
-  alternates: {
-    canonical: "/",
-  },
-  openGraph: {
-    title: "クアトロマップ大阪｜大阪のクアトロフォルマッジ店を地図で探す",
-    description: siteDescription,
-    url: absoluteUrl("/"),
-    images: [
-      {
-        url: absoluteUrl(ogImagePath),
-        width: 1200,
-        height: 630,
-        alt: "大阪のクアトロフォルマッジを探すクアトロマップ大阪",
-      },
-    ],
-  },
 };
 
 export default function Home() {

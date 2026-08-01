@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+
 export const siteName = "クアトロマップ大阪";
 export const siteDescription =
   "大阪市でクアトロフォルマッジが食べられるピザ屋・イタリアンを、エリア、アクセス、公式URL、Google Mapsから探せる情報サイトです。";
@@ -21,3 +23,38 @@ export const absoluteUrl = (path = "") => {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
   return `${siteUrl}${normalizedPath === "/" ? "" : normalizedPath}`;
 };
+
+export type PageMetadataInput = {
+  title: string;
+  description: string;
+  path: string;
+  imagePath?: string;
+};
+
+export function buildPageMetadata({
+  title,
+  description,
+  path,
+  imagePath = ogImagePath,
+}: PageMetadataInput): Metadata {
+  return {
+    title,
+    description,
+    alternates: { canonical: path },
+    openGraph: {
+      type: "website",
+      locale: "ja_JP",
+      siteName,
+      title,
+      description,
+      url: absoluteUrl(path),
+      images: [{ url: absoluteUrl(imagePath), width: 1200, height: 630, alt: title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [absoluteUrl(imagePath)],
+    },
+  };
+}
