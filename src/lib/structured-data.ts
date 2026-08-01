@@ -37,7 +37,6 @@ export function buildRestaurantJsonLd(shop: Shop) {
     ...(sameAs.length ? { sameAs } : {}),
   };
 }
-
 export function buildBreadcrumbJsonLd(items: BreadcrumbItem[]) {
   return {
     "@context": "https://schema.org",
@@ -68,4 +67,3 @@ export function buildItemListJsonLd({ name, description, shops }: ItemListInput)
     })),
   };
 }
-

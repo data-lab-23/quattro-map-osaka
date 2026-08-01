@@ -209,10 +209,9 @@ git commit -m "feat: centralize search metadata"
 - Create: `src/lib/structured-data.test.ts`
 - Modify: `src/app/shops/[slug]/page.tsx`
 - Modify: `src/app/osaka/[wardSlug]/page.tsx`
-- Create: `src/app/guides/[guideSlug]/page.tsx`
 
 **Interfaces:**
-- Consumes: `Shop`, `GuideDefinition`, ward name/slug, `absoluteUrl`.
+- Consumes: `Shop`, ward name/slug, `absoluteUrl`.
 - Produces: `buildRestaurantJsonLd(shop: Shop)`, `buildBreadcrumbJsonLd(items: BreadcrumbItem[])`, and `buildItemListJsonLd(input: ItemListInput)`.
 
 > **Baseline constraint:** The remote baseline does not contain `src/app/guides/[guideSlug]/page.tsx` or `src/data/guides.ts`. Guide JSON-LD integration is therefore deferred to Task 6, which must create those route and data files (or an architecture-consistent equivalent) with tests and verification.
@@ -256,7 +255,7 @@ Expected: FAIL because `structured-data.ts` does not exist.
 
 - [ ] **Step 3: Implement the builders**
 
-`buildRestaurantJsonLd` must emit `@context`, `@type: "Restaurant"`, `@id`, `name`, page URL, image, cuisine, address, optional geo, optional price range, and filtered `sameAs`. It must not emit `aggregateRating` or `review`. `buildBreadcrumbJsonLd` must convert `{name, path}` items to consecutive `ListItem` values. `buildItemListJsonLd` must expose only the passed published shops.
+`buildRestaurantJsonLd` must emit only `@context`, `@type: "Restaurant"`, `@id`, `name`, page URL, image when shown, address, optional visible price range, and filtered visible `sameAs` links. It must not emit `aggregateRating`, `review`, cuisine, or coordinates. `buildBreadcrumbJsonLd` must convert `{name, path}` items to consecutive `ListItem` values. `buildItemListJsonLd` must expose only the passed published shops.
 
 - [ ] **Step 4: Replace inline JSON-LD in the existing shop and ward page families**
 
@@ -275,7 +274,7 @@ Expected: the new policy test proves `aggregateRating` is absent, all tests pass
 - [ ] **Step 6: Commit**
 
 ```powershell
-git add src/lib/structured-data.ts src/lib/structured-data.test.ts src/app/shops src/app/osaka src/app/guides
+git add src/lib/structured-data.ts src/lib/structured-data.test.ts src/app/shops src/app/osaka
 git commit -m "fix: align restaurant structured data with visible sources"
 ```
 
@@ -458,7 +457,7 @@ git commit -m "feat: publish editorial standards and site evidence"
 - Create: `src/data/guides.ts`
 - Create: `src/components/Breadcrumbs.tsx`
 - Modify: `src/app/osaka/[wardSlug]/page.tsx`
-- Modify: `src/app/guides/[guideSlug]/page.tsx`
+- Create: `src/app/guides/[guideSlug]/page.tsx`
 - Modify: `src/app/shops/[slug]/page.tsx`
 - Modify: `src/app/globals.css`
 
@@ -486,7 +485,11 @@ Change the ward item type to `{ slug, name, summary }` and use these exact summa
 { slug: "joto", name: "城東区", summary: "城東区の掲載店を、最寄り駅、アクセス、確認日とともに確認できます。" },
 ```
 
-- [ ] **Step 2: Add a reusable breadcrumb component**
+- [ ] **Step 2: Create guide data, route, and matching tests**
+
+Write failing tests in `src/data/guides.test.ts` for guide definitions that include only published matching shops. Then create `src/data/guides.ts` and `src/app/guides/[guideSlug]/page.tsx` (or architecture-consistent equivalents), render only generated non-empty guides, and verify the route is included in the static export.
+
+- [ ] **Step 3: Add a reusable breadcrumb component**
 
 ```tsx
 import Link from "next/link";
@@ -502,17 +505,18 @@ export function Breadcrumbs({ items }: { items: BreadcrumbLink[] }) {
 }
 ```
 
-- [ ] **Step 3: Make page copy and JSON-LD use the same definitions**
+- [ ] **Step 4: Make page copy and JSON-LD use the same definitions**
 
 Ward pages must render `ward.summary`. Guide pages must render their existing `description` plus a visible selection note based on `guide.kind`. Shop pages must link to the matching ward and to applicable purpose guides. All page families must render `Breadcrumbs` with the same items passed to `buildBreadcrumbJsonLd`.
 
-- [ ] **Step 4: Keep index scope constrained**
+- [ ] **Step 5: Keep index scope constrained**
 
 Retain the existing `stationCounts >= 2` condition. Do not add new district, cuisine, or “best” pages. If a generated station guide has no matched published shops during build, exclude it from `guides` rather than outputting an empty page.
 
-- [ ] **Step 5: Run tests and build**
+- [ ] **Step 6: Run tests and build**
 
 ```powershell
+npx tsx --test src/data/guides.test.ts
 npm test
 npm run lint
 npm run build
@@ -520,7 +524,7 @@ npm run build
 
 Expected: all checks pass, new guide matching tests pass, and all ward/guide/shop static pages generate.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 7: Commit**
 
 ```powershell
 git add src/data/wards.ts src/data/guides.ts src/components/Breadcrumbs.tsx src/app/osaka src/app/guides src/app/shops src/app/globals.css
@@ -690,4 +694,3 @@ git add docs/seo-operations.md docs/seo-baseline.md
 git commit -m "docs: add SEO measurement runbook"
 git push
 ```
-
