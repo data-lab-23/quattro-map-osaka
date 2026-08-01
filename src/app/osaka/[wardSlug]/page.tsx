@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MapView } from "@/components/MapView";
 import { ShopCard } from "@/components/ShopCard";
 import { wards } from "@/data/wards";
 import { getShopsByWard } from "@/lib/shops";
 import { absoluteUrl, siteName } from "@/lib/seo";
+import { buildBreadcrumbJsonLd, buildItemListJsonLd } from "@/lib/structured-data";
 
 type Props = { params: Promise<{ wardSlug: string }> };
 
@@ -38,48 +40,40 @@ export default async function WardPage({ params }: Props) {
 
   const list = getShopsByWard(ward.slug);
   const verified = list.filter((shop) => shop.verificationStatus.startsWith("verified")).length;
+  const breadcrumbItems = [
+    { name: siteName, path: "/" },
+    { name: `大阪市${ward.name}`, path: `/osaka/${ward.slug}` },
+  ];
+  const itemList = buildItemListJsonLd({ name: ward.name, shops: list });
   const jsonLd = [
     {
       "@context": "https://schema.org",
       "@type": "CollectionPage",
-      name: `大阪市${ward.name}のクアトロフォルマッジ店`,
+      name: itemList.name,
       url: absoluteUrl(`/osaka/${ward.slug}`),
-      description: `大阪市${ward.name}でクアトロフォルマッジが食べられる候補店の一覧です。`,
+      description: itemList.description,
       inLanguage: "ja-JP",
       mainEntity: {
-        "@type": "ItemList",
-        numberOfItems: list.length,
-        itemListElement: list.map((shop, index) => ({
-          "@type": "ListItem",
-          position: index + 1,
-          url: absoluteUrl(`/shops/${shop.slug}`),
-          name: shop.name,
-        })),
+        "@type": itemList["@type"],
+        numberOfItems: itemList.numberOfItems,
+        itemListElement: itemList.itemListElement,
       },
     },
-    {
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      itemListElement: [
-        {
-          "@type": "ListItem",
-          position: 1,
-          name: siteName,
-          item: absoluteUrl("/"),
-        },
-        {
-          "@type": "ListItem",
-          position: 2,
-          name: `大阪市${ward.name}`,
-          item: absoluteUrl(`/osaka/${ward.slug}`),
-        },
-      ],
-    },
+    buildBreadcrumbJsonLd(breadcrumbItems),
   ];
 
   return (
     <div className="container ward-page">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <nav aria-label="パンくず" className="breadcrumbs">
+        <ol>
+          {breadcrumbItems.map((item) => (
+            <li key={item.path}>
+              <Link href={item.path}>{item.name}</Link>
+            </li>
+          ))}
+        </ol>
+      </nav>
       <span className="eyebrow">OSAKA / {ward.slug.toUpperCase()}</span>
       <h1>
         大阪市{ward.name}で

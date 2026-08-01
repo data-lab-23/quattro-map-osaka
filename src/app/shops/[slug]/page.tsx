@@ -7,6 +7,7 @@ import { VerificationBadge } from "@/components/VerificationBadge";
 import { getShopBySlug } from "@/lib/shops";
 import { shops } from "@/data/shops";
 import { absoluteUrl, siteName } from "@/lib/seo";
+import { buildBreadcrumbJsonLd, buildRestaurantJsonLd } from "@/lib/structured-data";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -58,71 +59,27 @@ export default async function ShopPage({ params }: Props) {
   if (!shop) notFound();
 
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
-  const jsonLd = [
-    {
-      "@context": "https://schema.org",
-      "@type": "Restaurant",
-      "@id": absoluteUrl(`/shops/${shop.slug}#restaurant`),
-      name: shop.name,
-      url: shop.websiteUrl ?? absoluteUrl(`/shops/${shop.slug}`),
-      mainEntityOfPage: absoluteUrl(`/shops/${shop.slug}`),
-      image: shop.imageUrl ? absoluteUrl(shop.imageUrl) : absoluteUrl("/images/quattro-formaggi-hero.png"),
-      servesCuisine: ["イタリア料理", "ピザ", "クアトロフォルマッジ"],
-      address: {
-        "@type": "PostalAddress",
-        addressLocality: "大阪市",
-        addressRegion: "大阪府",
-        streetAddress: shop.address,
-        addressCountry: "JP",
-      },
-      geo:
-        shop.latitude !== undefined && shop.longitude !== undefined
-          ? { "@type": "GeoCoordinates", latitude: shop.latitude, longitude: shop.longitude }
-          : undefined,
-      aggregateRating:
-        shop.googleRating && shop.googleReviewCount
-          ? {
-              "@type": "AggregateRating",
-              ratingValue: shop.googleRating,
-              reviewCount: shop.googleReviewCount,
-              bestRating: 5,
-              worstRating: 1,
-            }
-          : undefined,
-      priceRange: shop.quattroPriceText,
-      sameAs: [shop.googleMapsUrl, shop.websiteUrl, shop.instagramUrl].filter(Boolean),
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      itemListElement: [
-        {
-          "@type": "ListItem",
-          position: 1,
-          name: siteName,
-          item: absoluteUrl("/"),
-        },
-        {
-          "@type": "ListItem",
-          position: 2,
-          name: `大阪市${shop.ward}`,
-          item: absoluteUrl(`/osaka/${shop.wardSlug}`),
-        },
-        {
-          "@type": "ListItem",
-          position: 3,
-          name: shop.name,
-          item: absoluteUrl(`/shops/${shop.slug}`),
-        },
-      ],
-    },
+  const breadcrumbItems = [
+    { name: siteName, path: "/" },
+    { name: `大阪市${shop.ward}`, path: `/osaka/${shop.wardSlug}` },
+    { name: shop.name, path: `/shops/${shop.slug}` },
   ];
+  const jsonLd = [buildRestaurantJsonLd(shop), buildBreadcrumbJsonLd(breadcrumbItems)];
 
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <section className="detail-hero">
         <div className="container">
+          <nav aria-label="パンくず" className="breadcrumbs">
+            <ol>
+              {breadcrumbItems.map((item) => (
+                <li key={item.path}>
+                  <Link href={item.path}>{item.name}</Link>
+                </li>
+              ))}
+            </ol>
+          </nav>
           <Link className="back" href="/">
             ← お店一覧に戻る
           </Link>
