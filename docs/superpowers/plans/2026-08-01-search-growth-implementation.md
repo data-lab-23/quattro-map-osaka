@@ -209,11 +209,13 @@ git commit -m "feat: centralize search metadata"
 - Create: `src/lib/structured-data.test.ts`
 - Modify: `src/app/shops/[slug]/page.tsx`
 - Modify: `src/app/osaka/[wardSlug]/page.tsx`
-- Modify: `src/app/guides/[guideSlug]/page.tsx`
+- Create: `src/app/guides/[guideSlug]/page.tsx`
 
 **Interfaces:**
 - Consumes: `Shop`, `GuideDefinition`, ward name/slug, `absoluteUrl`.
 - Produces: `buildRestaurantJsonLd(shop: Shop)`, `buildBreadcrumbJsonLd(items: BreadcrumbItem[])`, and `buildItemListJsonLd(input: ItemListInput)`.
+
+> **Baseline constraint:** The remote baseline does not contain `src/app/guides/[guideSlug]/page.tsx` or `src/data/guides.ts`. Guide JSON-LD integration is therefore deferred to Task 6, which must create those route and data files (or an architecture-consistent equivalent) with tests and verification.
 
 - [ ] **Step 1: Write failing structured-data tests**
 
@@ -256,9 +258,9 @@ Expected: FAIL because `structured-data.ts` does not exist.
 
 `buildRestaurantJsonLd` must emit `@context`, `@type: "Restaurant"`, `@id`, `name`, page URL, image, cuisine, address, optional geo, optional price range, and filtered `sameAs`. It must not emit `aggregateRating` or `review`. `buildBreadcrumbJsonLd` must convert `{name, path}` items to consecutive `ListItem` values. `buildItemListJsonLd` must expose only the passed published shops.
 
-- [ ] **Step 4: Replace inline JSON-LD in all three page families**
+- [ ] **Step 4: Replace inline JSON-LD in the existing shop and ward page families**
 
-Import the builders, preserve visible Google rating labels, and remove the inline `aggregateRating` block from the shop page. Add visible breadcrumb navigation matching each `BreadcrumbList`.
+Import the builders, preserve visible Google rating labels, and remove the inline `aggregateRating` block from the shop page. Add visible breadcrumb navigation matching each `BreadcrumbList`. Defer guide JSON-LD integration until Task 6 creates the missing guide route and data source.
 
 - [ ] **Step 5: Run tests and lint**
 
@@ -453,12 +455,14 @@ git commit -m "feat: publish editorial standards and site evidence"
 
 **Files:**
 - Modify: `src/data/wards.ts`
-- Modify: `src/data/guides.ts`
+- Create: `src/data/guides.ts`
 - Create: `src/components/Breadcrumbs.tsx`
 - Modify: `src/app/osaka/[wardSlug]/page.tsx`
 - Modify: `src/app/guides/[guideSlug]/page.tsx`
 - Modify: `src/app/shops/[slug]/page.tsx`
 - Modify: `src/app/globals.css`
+
+**Baseline constraint:** The remote baseline lacks guide data and a guide route. This task must create `src/data/guides.ts` and `src/app/guides/[guideSlug]/page.tsx` (or an architecture-consistent equivalent), then verify their static output.
 
 **Interfaces:**
 - Consumes: enhanced ward/guide definitions and published shop relationships.
@@ -514,7 +518,7 @@ npm run lint
 npm run build
 ```
 
-Expected: all checks pass, existing guide matching tests remain green, and all ward/guide/shop static pages generate.
+Expected: all checks pass, new guide matching tests pass, and all ward/guide/shop static pages generate.
 
 - [ ] **Step 6: Commit**
 
@@ -686,3 +690,4 @@ git add docs/seo-operations.md docs/seo-baseline.md
 git commit -m "docs: add SEO measurement runbook"
 git push
 ```
+

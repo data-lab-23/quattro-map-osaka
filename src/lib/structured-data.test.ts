@@ -20,6 +20,17 @@ test("restaurant JSON-LD omits Google aggregate ratings and reviews", () => {
   assert.equal(jsonLd.address.streetAddress, shops[0].address);
 });
 
+test("restaurant JSON-LD omits cuisine and coordinates that the shop page does not render", () => {
+  const jsonLd = buildRestaurantJsonLd({
+    ...shops[0],
+    latitude: 34.7,
+    longitude: 135.5,
+  });
+
+  assert.equal("servesCuisine" in jsonLd, false);
+  assert.equal("geo" in jsonLd, false);
+});
+
 test("breadcrumb JSON-LD uses consecutive positions and absolute URLs", () => {
   const jsonLd = buildBreadcrumbJsonLd([
     { name: "Quattro Map Osaka", path: "/" },

@@ -26,7 +26,6 @@ export function buildRestaurantJsonLd(shop: Shop) {
     url: pageUrl,
     mainEntityOfPage: pageUrl,
     ...(shop.imageUrl ? { image: absoluteUrl(shop.imageUrl) } : {}),
-    servesCuisine: ["イタリア料理", "ピザ", "クアトロフォルマッジ"],
     address: {
       "@type": "PostalAddress",
       addressLocality: "大阪市",
@@ -34,15 +33,6 @@ export function buildRestaurantJsonLd(shop: Shop) {
       streetAddress: shop.address,
       addressCountry: "JP",
     },
-    ...(shop.latitude !== undefined && shop.longitude !== undefined
-      ? {
-          geo: {
-            "@type": "GeoCoordinates",
-            latitude: shop.latitude,
-            longitude: shop.longitude,
-          },
-        }
-      : {}),
     ...(shop.quattroPriceText ? { priceRange: shop.quattroPriceText } : {}),
     ...(sameAs.length ? { sameAs } : {}),
   };
@@ -78,3 +68,4 @@ export function buildItemListJsonLd({ name, description, shops }: ItemListInput)
     })),
   };
 }
+
