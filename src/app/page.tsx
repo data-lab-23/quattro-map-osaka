@@ -2,36 +2,27 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { ShopExplorer } from "@/components/ShopExplorer";
+import { shops as allShops } from "@/data/shops";
 import { getPublishedShops } from "@/lib/shops";
 import { siteOwnerNote } from "@/data/site";
 import { wards } from "@/data/wards";
-import { absoluteUrl, ogImagePath, siteDescription, siteKeywords, siteName } from "@/lib/seo";
+import { absoluteUrl, buildPageMetadata, siteDescription, siteKeywords, siteName } from "@/lib/seo";
+import { getSiteStats } from "@/lib/site-stats";
 
 export const metadata: Metadata = {
-  title: "大阪のクアトロフォルマッジ店を地図で探す",
-  description:
-    "大阪市でクアトロフォルマッジが食べられるピザ屋・イタリアンを、地図、エリア、Googleレビュー、アクセス、公式URLから探せる情報サイトです。",
+  ...buildPageMetadata({
+    title: "大阪のクアトロフォルマッジを探す",
+    description:
+      "大阪市でクアトロフォルマッジが食べられるピザ屋・イタリアンを、地図、エリア、Googleレビュー、アクセス、公式URLから探せる情報サイトです。",
+    path: "/",
+    absoluteTitle: true,
+  }),
   keywords: siteKeywords,
-  alternates: {
-    canonical: "/",
-  },
-  openGraph: {
-    title: "クアトロマップ大阪｜大阪のクアトロフォルマッジ店を地図で探す",
-    description: siteDescription,
-    url: absoluteUrl("/"),
-    images: [
-      {
-        url: absoluteUrl(ogImagePath),
-        width: 1200,
-        height: 630,
-        alt: "大阪のクアトロフォルマッジを探すクアトロマップ大阪",
-      },
-    ],
-  },
 };
 
 export default function Home() {
   const shops = getPublishedShops();
+  const siteStats = getSiteStats(allShops);
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
   const jsonLd = [
     {
@@ -106,6 +97,23 @@ export default function Home() {
           <div>
             <b>大阪でクアトロフォルマッジを愛する管理人が立ち上げました。</b>
             <p>{siteOwnerNote}</p>
+            <dl className="home-stats" aria-label="掲載状況">
+              <div>
+                <dt>公開掲載店</dt>
+                <dd>{siteStats.publishedCount}件</dd>
+              </div>
+              <div>
+                <dt>確認済み掲載店</dt>
+                <dd>{siteStats.verifiedCount}件</dd>
+              </div>
+              <div>
+                <dt>最新確認日</dt>
+                <dd>{siteStats.latestVerifiedAt || "記録なし"}</dd>
+              </div>
+            </dl>
+            <Link className="home-standards-link" href="/about">
+              掲載・確認の基準を見る →
+            </Link>
           </div>
         </div>
       </div>

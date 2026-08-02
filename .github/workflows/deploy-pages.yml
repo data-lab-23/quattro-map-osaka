@@ -3,6 +3,8 @@ name: Deploy Quattro Map Osaka to GitHub Pages
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -11,7 +13,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: pages-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -24,18 +26,27 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
+      - run: npm test
+      - run: npm run lint
+      - run: npm run typecheck
       - run: npm run build
         env:
           PAGES_BASE_PATH: /quattro-map-osaka
           NEXT_PUBLIC_BASE_PATH: /quattro-map-osaka
-          NEXT_PUBLIC_SITE_URL: https://arsenal23vm-netizen.github.io/quattro-map-osaka
+          NEXT_PUBLIC_SITE_URL: https://data-lab-23.github.io/quattro-map-osaka
           NEXT_PUBLIC_GA_ID: ${{ vars.NEXT_PUBLIC_GA_ID }}
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - run: npm run verify:seo
+        env:
+          NEXT_PUBLIC_SITE_URL: https://data-lab-23.github.io/quattro-map-osaka
+      - if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@v5
+      - if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v3
         with:
           path: ./out
 
   deploy:
+    if: github.event_name != 'pull_request'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

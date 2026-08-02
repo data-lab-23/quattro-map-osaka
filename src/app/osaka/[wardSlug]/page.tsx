@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { MapView } from "@/components/MapView";
 import { ShopCard } from "@/components/ShopCard";
+import { guides, getShopsForGuide } from "@/data/guides";
 import { wards } from "@/data/wards";
 import { getShopsByWard } from "@/lib/shops";
 import { absoluteUrl, siteName } from "@/lib/seo";
+import { buildBreadcrumbJsonLd, buildItemListJsonLd } from "@/lib/structured-data";
 
 type Props = { params: Promise<{ wardSlug: string }> };
 
@@ -38,57 +42,43 @@ export default async function WardPage({ params }: Props) {
 
   const list = getShopsByWard(ward.slug);
   const verified = list.filter((shop) => shop.verificationStatus.startsWith("verified")).length;
+  const breadcrumbItems = [
+    { name: siteName, path: "/" },
+    { name: `大阪市${ward.name}`, path: `/osaka/${ward.slug}` },
+  ];
+  const itemList = buildItemListJsonLd({ name: ward.name, shops: list });
+  const relatedGuides = guides.filter((guide) => getShopsForGuide(guide, list).length > 0);
+  const relatedWards = wards.filter(
+    (candidate) => candidate.slug !== ward.slug && getShopsByWard(candidate.slug).length > 0,
+  );
   const jsonLd = [
     {
       "@context": "https://schema.org",
       "@type": "CollectionPage",
-      name: `大阪市${ward.name}のクアトロフォルマッジ店`,
+      name: itemList.name,
       url: absoluteUrl(`/osaka/${ward.slug}`),
-      description: `大阪市${ward.name}でクアトロフォルマッジが食べられる候補店の一覧です。`,
+      description: itemList.description,
       inLanguage: "ja-JP",
       mainEntity: {
-        "@type": "ItemList",
-        numberOfItems: list.length,
-        itemListElement: list.map((shop, index) => ({
-          "@type": "ListItem",
-          position: index + 1,
-          url: absoluteUrl(`/shops/${shop.slug}`),
-          name: shop.name,
-        })),
+        "@type": itemList["@type"],
+        numberOfItems: itemList.numberOfItems,
+        itemListElement: itemList.itemListElement,
       },
     },
-    {
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      itemListElement: [
-        {
-          "@type": "ListItem",
-          position: 1,
-          name: siteName,
-          item: absoluteUrl("/"),
-        },
-        {
-          "@type": "ListItem",
-          position: 2,
-          name: `大阪市${ward.name}`,
-          item: absoluteUrl(`/osaka/${ward.slug}`),
-        },
-      ],
-    },
+    buildBreadcrumbJsonLd(breadcrumbItems),
   ];
 
   return (
     <div className="container ward-page">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <Breadcrumbs items={breadcrumbItems} />
       <span className="eyebrow">OSAKA / {ward.slug.toUpperCase()}</span>
       <h1>
         大阪市{ward.name}で
         <br />
         クアトロフォルマッジを探す
       </h1>
-      <p className="lead">
-        {ward.name}のピザ屋・イタリアンを、アクセスや確認状況とあわせて紹介します。
-      </p>
+      <p className="lead">{ward.summary}</p>
       <div className="stats">
         <div>
           <strong>{list.length}</strong>
@@ -105,6 +95,30 @@ export default async function WardPage({ params }: Props) {
           <ShopCard key={shop.id} shop={shop} />
         ))}
       </div>
+      {relatedGuides.length > 0 && (
+        <section className="related-links" aria-labelledby="ward-guide-links">
+          <h2 id="ward-guide-links">目的・駅から探す</h2>
+          <div>
+            {relatedGuides.map((guide) => (
+              <Link key={guide.slug} href={`/guides/${guide.slug}`}>
+                {guide.title}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+      {relatedWards.length > 0 && (
+        <section className="related-links" aria-labelledby="nearby-ward-links">
+          <h2 id="nearby-ward-links">大阪市のほかの区から探す</h2>
+          <div>
+            {relatedWards.map((candidate) => (
+              <Link key={candidate.slug} href={`/osaka/${candidate.slug}`}>
+                大阪市{candidate.name}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
       {!list.length && <p className="empty">現在、この区の掲載店舗はありません。情報を募集中です。</p>}
     </div>
   );
