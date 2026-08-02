@@ -45,6 +45,6 @@ NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
 
 ## 公開URL
 
-https://arsenal23vm-netizen.github.io/quattro-map-osaka/
+https://data-lab-23.github.io/quattro-map-osaka/
 
 Made by Malbon

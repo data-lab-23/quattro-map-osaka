@@ -4,8 +4,8 @@ This runbook keeps the public GitHub Pages site measurable and recoverable. It d
 
 ## Canonical production target
 
-- Production URL and base path: `https://arsenal23vm-netizen.github.io/quattro-map-osaka`
-- Sitemap: `https://arsenal23vm-netizen.github.io/quattro-map-osaka/sitemap.xml`
+- Production URL and base path: `https://data-lab-23.github.io/quattro-map-osaka`
+- Sitemap: `https://data-lab-23.github.io/quattro-map-osaka/sitemap.xml`
 - Primary queries: `クアトロフォルマッジ 大阪` and `大阪 クアトロフォルマッジ`
 
 ## Recurring checks
@@ -30,7 +30,7 @@ npm run lint
 npm run typecheck
 $env:PAGES_BASE_PATH = "/quattro-map-osaka"
 $env:NEXT_PUBLIC_BASE_PATH = "/quattro-map-osaka"
-$env:NEXT_PUBLIC_SITE_URL = "https://arsenal23vm-netizen.github.io/quattro-map-osaka"
+$env:NEXT_PUBLIC_SITE_URL = "https://data-lab-23.github.io/quattro-map-osaka"
 npm run build
 npm run verify:seo
 Remove-Item Env:PAGES_BASE_PATH, Env:NEXT_PUBLIC_BASE_PATH, Env:NEXT_PUBLIC_SITE_URL -ErrorAction SilentlyContinue
@@ -44,9 +44,9 @@ npm run lint
 npm run typecheck
 PAGES_BASE_PATH=/quattro-map-osaka \
 NEXT_PUBLIC_BASE_PATH=/quattro-map-osaka \
-NEXT_PUBLIC_SITE_URL=https://arsenal23vm-netizen.github.io/quattro-map-osaka \
+NEXT_PUBLIC_SITE_URL=https://data-lab-23.github.io/quattro-map-osaka \
 npm run build
-NEXT_PUBLIC_SITE_URL=https://arsenal23vm-netizen.github.io/quattro-map-osaka npm run verify:seo
+NEXT_PUBLIC_SITE_URL=https://data-lab-23.github.io/quattro-map-osaka npm run verify:seo
 ```
 
 The Pages workflow restores dependencies with `npm ci`, then runs the same test, lint, typecheck, build, and SEO verification gates. It supplies `NEXT_PUBLIC_GA_ID` from the repository variable `NEXT_PUBLIC_GA_ID`; leave analytics unset when that repository variable is not configured rather than placing an ID in source control.
@@ -55,13 +55,13 @@ The Pages workflow restores dependencies with `npm ci`, then runs the same test,
 
 Do this only after the GitHub Pages deployment workflow reports success. The seven required URLs are:
 
-1. `https://arsenal23vm-netizen.github.io/quattro-map-osaka/`
-2. `https://arsenal23vm-netizen.github.io/quattro-map-osaka/about`
-3. `https://arsenal23vm-netizen.github.io/quattro-map-osaka/osaka/kita`
-4. `https://arsenal23vm-netizen.github.io/quattro-map-osaka/guides/lunch`
-5. `https://arsenal23vm-netizen.github.io/quattro-map-osaka/shops/7-`
-6. `https://arsenal23vm-netizen.github.io/quattro-map-osaka/robots.txt`
-7. `https://arsenal23vm-netizen.github.io/quattro-map-osaka/sitemap.xml`
+1. `https://data-lab-23.github.io/quattro-map-osaka/`
+2. `https://data-lab-23.github.io/quattro-map-osaka/about`
+3. `https://data-lab-23.github.io/quattro-map-osaka/osaka/kita`
+4. `https://data-lab-23.github.io/quattro-map-osaka/guides/lunch`
+5. `https://data-lab-23.github.io/quattro-map-osaka/shops/7-`
+6. `https://data-lab-23.github.io/quattro-map-osaka/robots.txt`
+7. `https://data-lab-23.github.io/quattro-map-osaka/sitemap.xml`
 
 The shop URL above is a currently published, `verified_official` example. If it is removed or loses that status, replace it with a currently published verified shop and record the substitution.
 
@@ -70,7 +70,7 @@ In addition, check at least one CSS file, JavaScript file, and image URL referen
 Windows PowerShell status check:
 
 ```powershell
-$base = "https://arsenal23vm-netizen.github.io/quattro-map-osaka"
+$base = "https://data-lab-23.github.io/quattro-map-osaka"
 $paths = @( "/", "/about", "/osaka/kita", "/guides/lunch", "/shops/7-", "/robots.txt", "/sitemap.xml")
 
 function Get-Direct200Response {
@@ -106,7 +106,7 @@ $assets = [regex]::Matches($homeResponse.Content, '(?:href|src)="(/quattro-map-o
   ForEach-Object { $_.Groups[1].Value } |
   Select-Object -Unique
 $assets | ForEach-Object {
-  [void](Get-Direct200Response -ExpectedUrl "https://arsenal23vm-netizen.github.io$_" -Label "home-page asset")
+  [void](Get-Direct200Response -ExpectedUrl "https://data-lab-23.github.io$_" -Label "home-page asset")
 }
 ```
 
@@ -115,7 +115,7 @@ CI-safe Bash status check (replace the `CURRENT` CSS and JavaScript paths with p
 ```sh
 set -euo pipefail
 
-base=https://arsenal23vm-netizen.github.io/quattro-map-osaka
+base=https://data-lab-23.github.io/quattro-map-osaka
 required_paths=(
   /
   /about

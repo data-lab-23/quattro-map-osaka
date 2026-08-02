@@ -26,6 +26,8 @@ This record distinguishes observed evidence from actions that still require a su
 
 ## Deployment and Search Console status
 
+- GitHub repository ownership observed on `2026-08-02`: `https://github.com/data-lab-23/quattro-map-osaka` (the former repository URL redirects here).
+- Current production target: `https://data-lab-23.github.io/quattro-map-osaka/`.
 - GitHub Pages deployment for this branch: pending; no deployment success is claimed here.
 - Production seven-URL and asset checks: pending a successful Pages deployment.
 - Search Console access, sitemap submission, URL inspection, and indexing requests: pending authenticated follow-up.

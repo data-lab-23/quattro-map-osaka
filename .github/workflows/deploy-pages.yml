@@ -31,11 +31,11 @@ jobs:
         env:
           PAGES_BASE_PATH: /quattro-map-osaka
           NEXT_PUBLIC_BASE_PATH: /quattro-map-osaka
-          NEXT_PUBLIC_SITE_URL: https://arsenal23vm-netizen.github.io/quattro-map-osaka
+          NEXT_PUBLIC_SITE_URL: https://data-lab-23.github.io/quattro-map-osaka
           NEXT_PUBLIC_GA_ID: ${{ vars.NEXT_PUBLIC_GA_ID }}
       - run: npm run verify:seo
         env:
-          NEXT_PUBLIC_SITE_URL: https://arsenal23vm-netizen.github.io/quattro-map-osaka
+          NEXT_PUBLIC_SITE_URL: https://data-lab-23.github.io/quattro-map-osaka
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

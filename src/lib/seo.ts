@@ -5,7 +5,7 @@ export const siteDescription =
   "大阪市でクアトロフォルマッジが食べられるピザ屋・イタリアンを、エリア、アクセス、公式URL、Google Mapsから探せる情報サイトです。";
 
 export const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://arsenal23vm-netizen.github.io/quattro-map-osaka";
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://data-lab-23.github.io/quattro-map-osaka";
 
 export const siteKeywords = [
   "クアトロフォルマッジ 大阪",

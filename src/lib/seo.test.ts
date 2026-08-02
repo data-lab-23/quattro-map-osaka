@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { absoluteUrl, buildPageMetadata } from "./seo";
+import { absoluteUrl, buildPageMetadata, siteUrl } from "./seo";
+
+test("既定の本番URLは現在のGitHub Pages所有者を使う", () => {
+  assert.equal(siteUrl, "https://data-lab-23.github.io/quattro-map-osaka");
+});
 
 test("ホームページを一貫したタイトルとcanonicalへ導く", () => {
   const metadata = buildPageMetadata({
