@@ -24,3 +24,22 @@ test("公開設定と利用者向け文書は現在のGitHub所有者を参照�
     );
   }
 });
+
+test("PagesワークフローはPRを検証し、PR中はデプロイしない", () => {
+  const workflow = readFileSync(
+    resolve(process.cwd(), ".github/workflows/deploy-pages.yml"),
+    "utf8",
+  );
+
+  assert.match(workflow, /pull_request:\s*\r?\n\s+branches:\s*\[main\]/);
+  assert.match(
+    workflow,
+    /- if: github\.event_name != 'pull_request'\s*\r?\n\s+uses: actions\/configure-pages@v5/,
+  );
+  assert.match(
+    workflow,
+    /- if: github\.event_name != 'pull_request'\s*\r?\n\s+uses: actions\/upload-pages-artifact@v3/,
+  );
+  assert.match(workflow, /deploy:\s*\r?\n\s+if: github\.event_name != 'pull_request'/);
+  assert.match(workflow, /group: pages-\$\{\{ github\.workflow \}\}-\$\{\{ github\.ref \}\}/);
+});
