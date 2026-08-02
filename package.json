@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "tsx --test \"src/**/*.test.ts\" \"scripts/**/*.test.ts\"",
+    "test": "tsx --test",
     "typecheck": "tsc --noEmit",
     "verify:seo": "tsx scripts/verifySeoBuild.ts",
     "places:plan": "tsx scripts/places/planCollection.ts",

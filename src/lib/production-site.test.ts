@@ -43,3 +43,11 @@ test("PagesワークフローはPRを検証し、PR中はデプロイしない",
   assert.match(workflow, /deploy:\s*\r?\n\s+if: github\.event_name != 'pull_request'/);
   assert.match(workflow, /group: pages-\$\{\{ github\.workflow \}\}-\$\{\{ github\.ref \}\}/);
 });
+
+test("テストコマンドはOS依存のglobを使わず全テストを自動検出する", () => {
+  const packageJson = JSON.parse(
+    readFileSync(resolve(process.cwd(), "package.json"), "utf8"),
+  ) as { scripts?: { test?: string } };
+
+  assert.equal(packageJson.scripts?.test, "tsx --test");
+});
